@@ -1,0 +1,549 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; basic macros for EditBox ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ed_width              equ [edi]      ; field width
+ed_left               equ [edi + 4]  ; left border X
+ed_top                equ [edi + 8]  ; top border Y
+ed_color              equ [edi + 12] ; field color
+shift_color           equ [edi + 16] ; select color
+ed_focus_border_color equ [edi + 20] ; border color active
+ed_blur_border_color  equ [edi + 24] ; border color inactive
+ed_text_color         equ [edi + 28] ; color and font (as in sysfunc 4)
+ed_max                equ [edi + 32] ; chars max
+ed_text               equ [edi + 36] ; buffer pointer
+ed_mouse_variable     equ [edi + 40] ; pointer
+ed_flags              equ [edi + 44] 
+bp_flags              equ [ebp + 44] 
+ed_size               equ [edi + 48] ; chars currently
+bp_size               equ [ebp + 48] 
+ed_pos                equ [edi + 52] ; carret current position
+ed_offset             equ [edi + 56] 
+cl_curs_x             equ [edi + 60] ; previous cursor X
+cl_curs_y             equ [edi + 62] ; previous cursor Y
+ed_shift_pos          equ [edi + 64] ; selection current position
+ed_shift_pos_old      equ [edi + 66] ; selection previous position
+ed_height             equ [edi + 68]
+ed_char_width         equ [edi + 72]
+
+ed_struc_size = 76
+
+;;;;;;;;;;;;;;;;;;;;;;;
+;; flags for EditBox ;;
+;;;;;;;;;;;;;;;;;;;;;;;
+ed_pass         = 1     ; password mode
+ed_focus        = 2     ; active
+ed_shift        = 4     ; shift holded
+ed_shift_on     = 8     ; selection active
+ed_shift_bac    = 16    ; clear selection
+ed_left_fl      = 32
+ed_offset_fl    = 64
+ed_insert       = 128
+ed_mouse_on     = 256
+ed_ctrl_on      = 512
+ed_alt_on       = 400h
+ed_disabled     = 800h
+ed_always_focus = 4000h
+ed_figure_only  = 8000h
+ed_mous_adn_b   = ed_mouse_on or ed_shift_on or ed_shift_bac
+ed_shift_off    = not ed_shift
+ed_shift_mcl    = not ed_shift
+ed_shift_on_off = not ed_shift_on
+ed_shift_bac_cl = not ed_shift_bac
+ed_shift_cl     = not (ed_shift or ed_shift_on or ed_shift_bac)
+ed_right_fl     = not ed_left_fl
+ed_offset_cl    = not ed_offset_fl
+ed_insert_cl    = not ed_insert
+ed_mouse_on_off = not ed_mouse_on
+ed_ctrl_off     = not ed_ctrl_on
+ed_alt_off      = not ed_alt_on
+
+struc  edit_box width,left,top,color,shift_color,focus_border_color,\
+       blur_border_color,text_color,max,text,mouse_variable,flags,size,pos
+{
+  .width              dd width
+  .left               dd left
+  .top                dd top
+  .color              dd color
+  .shift_color        dd shift_color
+  .focus_border_color dd focus_border_color
+  .blur_border_color  dd blur_border_color
+  .text_color         dd text_color
+  .max                dd max
+  .text               dd text
+  .mouse_variable     dd mouse_variable
+  .flags              dd flags+0
+  .size               dd size+0
+  .pos                dd pos+0
+  .offset             dd 0
+  .cl_curs_x          dw 0
+  .cl_curs_y          dw 0
+  .shift              dw 0
+  .shift_old          dw 0
+  .height             dd 0
+  .char_width         dd 0
+}
+
+macro edit_boxes_set_sys_color start,end,color_table
+{
+        mov     edi,start
+        mov     ecx,((end-start)/ed_struc_size)
+        mov     esi,color_table
+        mov     ebx,[esi+system_colors.work_graph]        
+        mov     eax,[esi+system_colors.work]
+        shr     eax,1
+        shr     ebx,1
+        and     eax,7F7F7Fh
+        and     ebx,7F7F7Fh
+        add     eax,ebx                
+@@:
+        mov     ed_focus_border_color,ebx        
+        mov     ed_blur_border_color,eax
+        mov     shift_color,dword 0A4C4E4h
+        and     ed_text_color,dword 0FF000000h
+        mov     ed_color,dword 0FFFFFFh
+        add     edi,ed_struc_size
+        loop    @b
+}
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;Basic macros for use CheckBox                            ;
+;Last change 17.01.2013                                   ;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ch_text_margin equ [edi+8] ;=4 расстояние от прямоугольника чек бокса до надписи
+ch_color equ [edi+12]      ;цвет внутри checkbox
+ch_border_color equ [edi+16] ; or [edi+4] ;цвет рамки checkbox ее можно задать самостоятельно
+ch_text_color   equ [edi+20] ;[edi+4]  ;цвет текста
+ch_text_ptr     equ [edi+24] ;указатель на начало текстовой строки
+ch_flags equ [edi+28]      ;флаги
+
+ch_struc_size=36                ;размер структуры
+ch_flag_en=10b                  ;флаг установленного чек бокса.
+ch_flag_top=0x0                 ;флаг расположения текста вверху т.е. 3-й бит
+ch_flag_middle=100b             ;флаг расположения текста в центре т.е. 4-й бит.
+ch_flag_bottom=1000b            ;флаг расположения текста в низу т.е. по умолчанию принимается значение внизу т.е. отсуствие 3-го и 4-го бита
+
+2ch_left_s      equ [ebp]       ;кордината начала рисования по х
+2ch_top_s       equ [ebp+4]     ;координата начала рисования по у
+2ch_text_margin equ [ebp+8]     ;=4 расстояние от прямоугольника чек бокса до надписи
+2ch_color       equ [ebp+12]    ;цвет внутри checkbox
+2ch_border_color        equ [ebp+16]    ; or [edi+4] ;цвет рамки checkbox ее можно задать самостоятельно
+2ch_text_color  equ [ebp+20]    ;[edi+4]  ;цвет текста
+2ch_text_ptr    equ [ebp+24]    ;указатель на начало текстовой строки
+2ch_flags       equ [ebp+28]    ;флаги
+2ch_sz_str      equ [ebp+32]    ;длинна строки, вычисляется при инициализации компонента
+
+struc check_box2 left_s,top_s,ch_text_margin,color,border_color,text_color,text,flags
+{                               ;структура параметров для чек бокса
+.left_s         dd left_s       ;+0 положение по х dw + размер dw
+.top_s          dd top_s        ;+4 положение по у dw + размер dw
+.ch_text_margin dd ch_text_margin ;расстояние от прямоугольника чек бокса до надписи
+.color          dd color        ;цвет внутри чекбокса
+.border_color   dd border_color ;цвет рамки
+.text_color     dd text_color   ;цвет надписи
+.text           dd text         ;адрес в коде программы где расположен текст
+.flags          dd flags+0      ;флаги
+.size_of_str    dd 0x0          ;длинна строки, вычисляется при инициализации компонента
+}
+
+;Макрос проверки щелчка мышки над группой checkboxes.
+macro init_checkboxes2 start,end_cb
+{
+if start+ch_struc_size eq end_cb
+        ;когда один элемент
+        push    start                   ;указатель на checkbox
+        call    [init_checkbox] ;настройка checkbox'а
+else
+        ;когда несколько элементов
+        mov     ebp,start
+        mov     ecx,((end_cb-start)/ch_struc_size)
+@@:
+        push    ebp                     ;указатель на первый checkbox
+        call    [init_checkbox] ;настройка checkbox'ов
+        add     ebp,ch_struc_size
+        loop    @b
+end if
+}
+
+;Макрос проверки мышки группы checkboxes.
+macro checkboxes_mouse2 start,end_cb
+{
+if start+ch_struc_size eq end_cb
+        ;когда один элемент
+        push    start                   ;указатель на checkbox
+        call    [check_box_mouse]       ;макрос проверки мышки над checkbox'ом
+else
+        ;когда несколько элементов
+        mov     ebp,start
+        mov     ecx,((end_cb-start)/ch_struc_size)
+@@:
+        push    ebp                     ;указатель на первый checkbox
+        call    [check_box_mouse]       ;макрос проверки мышки над checkbox'ами
+        add     ebp,ch_struc_size
+        loop    @b
+end if
+}
+
+;Макрос отрисовки группы checkboxes.
+macro checkboxes_draw2 start,end_cb
+{
+if start+ch_struc_size eq end_cb
+        ;когда один элемент
+        push    start                   ;указатель на checkbox
+        call    [check_box_draw]        ;нарисовать checkbox
+else
+        ;когда несколько элементов
+        mov     ebp,start
+        mov     ecx,((end_cb-start)/ch_struc_size)
+@@:
+        push    ebp                     ;указатель на первый checkbox
+        call    [check_box_draw]        ;нарисовать checkbox'ы
+        add     ebp,ch_struc_size
+        loop    @b
+end if
+}
+
+macro check_boxes_set_sys_color2 start,end,color_table
+{
+        mov     ebp,start
+        mov     ecx,((end-start)/ch_struc_size)
+        mov     esi,color_table
+@@:
+        push    dword [esi+32]          ;цвет текста в рабочей области окна
+        or      dword [esp],0x80000000  ;необходимо для вывода ASCIIZ строк
+        pop     dword 2ch_text_color
+        push    dword [esi+36]          ;цвет графики в окне (разделительные линии и т.п.)
+        pop     dword 2ch_border_color
+        add     ebp,ch_struc_size
+        loop    @b
+}
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;Basic macros for use OptionBox                           ;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+struc option_box point_gr,left,top,op_text_margin,op_size,color,border_color,text_color,text,op_text_length,flags
+{        ;структура параметров для чек бокса
+op_flag_en=10b
+.option_group   dd point_gr
+.left           dw left                 ;+0 ;положение по х
+.top            dw top                  ;положение по у
+.ch_text_margin dd op_text_margin       ;расстояние от прямоугольника чек бокса до надписи
+.ch_size        dd op_size              ;размер квадрата чек бокса, для примера 12
+.color          dd color                ;цвет внутри чекбокса
+.border_color   dd border_color         ;цвет рамки
+.text_color     dd text_color           ;цвет надписи
+.text           dd text                 ;адрес в коде программы где расположен текст
+.ch_text_length dd op_text_length       ;длинна строки с символами
+.flags          dd flags+0              ; флаги
+}
+
+;op_struc_size equ
+option_group equ [edi]
+op_left equ [edi+4]    ;координата начала рисования по х
+op_top equ [edi+6]     ;координата начала рисования по у
+op_text_margin equ [edi+8]      ;=4 расстояние от прямоугольника чек бокса до надписи
+op_size equ [edi+12]             ;12 размер квадрата чек бокса
+op_color equ [edi+16]
+op_border_color equ [edi+20] ; or [edi+4] ;цвет рамки optionbox ее можно задать самостоятельно
+op_text_color equ   [edi+24];[edi+4]  ;цвет текста
+op_text_ptr equ [edi+28]    ;указатель на начало текстовой строки
+op_text_length equ [edi+32]
+op_flags equ [edi+36]       ;флаги
+
+macro option_boxes_set_sys_color color_table,group
+{
+        mov     ecx,group
+        mov     esi,color_table
+        mov     edi,[ecx]
+        mov     eax,[esi+24] ;цвет кнопки в рабочей области окна
+        mov     ebx,[esi+28] ;цвет текста на кнопке
+@@:
+        mov     op_border_color,eax
+        mov     op_color,ebx
+        push    dword [esi+32] ;цвет текста в рабочей области окна
+        pop     dword op_text_color
+        add     ecx,4
+        mov     edi,[ecx]
+        cmp     edi,0
+        jne     @b
+}
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;Basic macros for use TreeList                            ;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+struc tree_list info_size,info_max_count,style, img_cx,img_cy,\
+    col_bkg,col_zag,col_txt, box_l,box_t,box_w,box_h, capt_cy,info_capt_offs,\
+    info_capt_len,el_focus, p_scroll,on_press {
+.box_left    dd box_l
+.box_top     dd box_t
+.box_width   dd box_w
+.box_height  dd box_h
+.data_info   dd 0
+.info_size   dw info_size
+.info_max_count dd info_max_count
+.style       dd style
+.data_nodes  dd 0
+.data_img    dd 0
+.img_cx      dw img_cx
+.img_cy      dw img_cy
+.data_img_sys dd 0
+.ch_tim      dd 0
+.tim_undo    dd 0
+.cur_pos     dd 0
+.col_bkg     dd col_bkg
+.col_zag     dd col_zag
+.col_txt     dd col_txt
+.capt_cy     dw capt_cy
+.info_capt_offs dw info_capt_offs
+.info_capt_len dw info_capt_len
+.el_focus    dd el_focus
+.p_scroll    dd p_scroll
+.on_press    dd on_press
+}
+
+tl_box_left   equ dword[edi]
+tl_box_top    equ dword[edi+ 4]
+tl_box_width  equ dword[edi+ 8]
+tl_box_height equ dword[edi+12]
+tl_data_info  equ dword[edi+16] ;указатель на основные даные
+tl_info_size  equ  word[edi+20] ;размер данных выделяемых для каждого узла (пользовательськие данные + текст для подписи)
+tl_info_max_count equ dword[edi+22] ;максимальное количество узлов, которые можно добавить в элемент
+tl_style      equ dword[edi+26] ;стили элемента
+tl_data_nodes equ dword[edi+30] ;указатель на структуры узлов
+tl_data_img   equ dword[edi+34] ;указатель на изображения с иконками узлов
+tl_img_cx     equ  word[edi+38] ;ширина иконок
+tl_img_cy     equ  word[edi+40] ;высота иконок
+tl_data_img_sys equ dword[edi+42] ;указатель на системные изображения (стрелки, плюсики)
+tl_ch_tim     equ dword[edi+46] ;количество изменений в файле
+tl_tim_undo   equ dword[edi+50] ;количество отмененных действий
+tl_cur_pos    equ dword[edi+54] ;позиция курсора
+tl_col_bkg    equ dword[edi+58] ;цвет фона
+tl_col_zag    equ dword[edi+62] ;цвет заголовка
+tl_col_txt    equ dword[edi+66] ;цвет текста
+tl_capt_cy    equ  word[edi+70] ;высота подписи
+tl_info_capt_offs equ word[edi+72] ;сдвиг для начала текста (подписи узла)
+tl_info_capt_len equ word[edi+74] ;длинна текста подписи узла (если = 0 то до конца структуры)
+tl_el_focus   equ dword[edi+76] ;указатель на структуру элемента в фокусе
+tl_p_scroll   equ dword[edi+80] ;указатель на структуру скроллинга
+tl_on_press   equ dword[edi+84] ;указатель на функцию, которая вызывается при нажатии Enter
+
+;константы стиля
+tl_key_no_edit   equ   1b ;элемент нельзя редактировать на клавиатуре (изменять уровни, удалять)
+tl_draw_par_line equ  10b ;рисовать линии к родительскому узлу
+tl_list_box_mode equ 100b ;стиль не отображает уровни (как в ListBox все одного уровня)
+tl_cursor_pos_limited equ 8 ;перемещение курсора ограничено существующими узлами
+
+;константы для функций
+tl_err_save_memory_size equ  10b ;не хватает памяти для сохранения элемента
+tl_err_load_caption     equ   1b ;в памяти нет заголовка 'tree'
+tl_err_load_info_size   equ 100b ;не совпадает размер информационной структуры при открытии
+tl_load_mode_add        equ 0x20000 ;опция считывания в режиме добавления информации
+tl_save_load_heder_size equ 26 ;размер заголовка для записи/чтения элементов
+tl_offs_box equ 0 ;начало BOX структуры для tree_list
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;Basic macros for use TextEditor                          ;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+ted_wnd_l equ dword[edi+ 0] ;окно редактора: отступ слева
+ted_wnd_t equ dword[edi+ 4] ;окно редактора: отступ сверху
+ted_wnd_w equ dword[edi+ 8] ;окно редактора: ширина
+ted_wnd_h equ dword[edi+12] ;окно редактора: высота
+ted_rec_l equ dword[edi+16] ;ширина панели в окне
+ted_rec_t equ dword[edi+20] ;высота панели в окне
+ted_rec_w equ dword[edi+24] ;ширина символа (знакоместа) в окне
+ted_rec_h equ dword[edi+28] ;высота символа (знакоместа) в окне
+ted_drag_m equ byte[edi+32] ;выделение от мыши
+ted_drag_k equ byte[edi+33] ;выделение от клавиатуры
+ted_sel_x0 equ dword[edi+34] ;координата выделения x0
+ted_sel_y0 equ dword[edi+38] ;координата выделения y0
+ted_sel_x1 equ dword[edi+42] ;координата выделения x1
+ted_sel_y1 equ dword[edi+46] ;координата выделения y1
+;запасные координаты выделения
+ted_seln_x0 equ dword[edi+50]
+ted_seln_y0 equ dword[edi+54]
+ted_seln_x1 equ dword[edi+58]
+ted_seln_y1 equ dword[edi+62]
+
+ted_tex     equ dword[edi+66] ;указатель на память для хранения текста
+ted_tex_1   equ dword[edi+70] ;указатель на 1-ю стркутру символа
+ted_tex_end equ dword[edi+74] ;указатель на последнюю структуру символа
+ted_cur_x   equ dword[edi+78] ;координата x курсора
+ted_cur_y   equ dword[edi+82] ;координата y курсора
+ted_max_chars equ dword[edi+86] ;максимальное число символов в одном документе
+ted_colors_text_count equ dword[edi+90] ;колличество цветов текста
+ted_key_words_count   equ dword[edi+94] ;колличество ключевых слов
+ted_color_cursor   equ dword[edi+98] ;цвет курсора
+ted_color_wnd_capt equ dword[edi+102] ;цвет полей вокруг окна
+ted_color_wnd_work equ dword[edi+106] ;цвет фона окна
+ted_color_wnd_bord equ dword[edi+110] ;цвет текста на полях
+ted_color_select   equ dword[edi+114] ;цвет выделения
+ted_color_cur_text equ dword[edi+118] ;цвет символа под курсором
+ted_color_wnd_text equ dword[edi+122] ;цвет текста в окне
+ted_syntax_file    equ dword[edi+126] ;указатель на начало файла синтаксиса
+ted_syntax_file_size equ dword[edi+130] ;максимальный размер файла синтаксиса
+ted_text_colors     equ dword[edi+134] ;указатель на массив цветов текста
+ted_help_text_f1    equ dword[edi+138] ;указатель на текст справки (по нажатии F1)
+ted_help_id         equ dword[edi+142] ;идентификатор для справки
+ted_key_words_data  equ dword[edi+146] ;указатель на структуры ключевых слов TexColViv
+ted_tim_ch          equ dword[edi+150] ;колличество изменений в файле
+ted_tim_undo        equ dword[edi+154] ;колличество отмененных действий
+ted_tim_ls          equ dword[edi+158] ;время последнего сохранения
+ted_tim_co          equ dword[edi+162] ;время последней цветовой разметки
+ted_el_focus        equ dword[edi+166] ;указатель на переменную элемента в фокусе
+ted_err_save        equ  byte[edi+170] ;ошибка сохранения файла
+ted_panel_id        equ  byte[edi+171] ;номер открытой панели
+ted_key_new         equ  byte[edi+172] ;символ, который будет добавлятся с клавиатуры
+ted_symbol_new_line equ  byte[edi+173] ;символ завершения строки
+ted_scr_w           equ dword[edi+174] ;вертикальный скроллинг
+ted_scr_h           equ dword[edi+178] ;горизонтальный скроллинг
+ted_arr_key_pos     equ dword[edi+182] ;указатель на массив позиций ключевых слов
+ted_buffer          equ dword[edi+186] ;указатель на буфер копирования/вставки
+ted_buffer_find     equ dword[edi+190] ;указатель на буфер для поиска
+ted_cur_ins         equ  byte[edi+194] ;режим работы курсора (обычный или замена)
+ted_mode_color      equ  byte[edi+195] ;режим выделения слов цветом (0-выкл. 1-вкл.)
+ted_mode_invis      equ  byte[edi+196] ;режим показа непечатаемых символов
+ted_gp_opt          equ  byte[edi+197] ;опции возвращаемые функцией ted_get_pos_by_cursor
+ted_fun_on_key_ctrl_all equ dword[edi+198] ;указатель на функцию вызываемую при нажатии Ctrl+N,O,F,S,H,G
+;+202,+206,+210 зарезервировано
+ted_buffer_size       equ dword[edi+214] ;размер буфера копирования/вставки
+ted_fun_find_err      equ dword[edi+218] ;указатель на функцию вызываемую если поиск закончился неудачно
+;ted_fun_init_synt_err equ dword[edi+222] ;указатель на функцию вызываемую при ошибочном открытии файла синтаксиса
+ted_fun_draw_panel_buttons equ dword[edi+226] ;указатель на функцию рисования панели с кнопками
+ted_fun_draw_panels    equ dword[edi+230] ;указатель на функцию рисования панели поиска|...|синтаксиса
+ted_fun_save_err      equ dword[edi+238] ;указатель на функцию вызываемую если сохранение файла закончилось неудачно
+ted_increase_size     equ dword[edi+242] ;число символов на которые будет увечиваться память при нехватке
+ted_ptr_free_symb     equ dword[edi+246] ;указатель на свободную память, в которую можно добавлять символ (используется внутри элемента для ускорения вставки текста)
+ted_font_size         equ dword[edi+250] ;множитель для размера шрифта (при изменении нужно также изменять параметры ted_rec_w, ted_rec_h)
+;------------------------------------------------------------------------------
+ted_opt_ed_move_cursor equ 1 ;двигать курсор после добавления текста
+ted_opt_ed_change_time equ 2 ;добавлять изменения при редактировании текста
+ted_offs_sel  equ 34 ;смещение структуры sel
+ted_offs_seln equ 50 ;смещение структуры seln
+ted_offs_count_colors equ 90 ;смещение переменной колличества цветов
+ted_offs_key_new equ 172
+ted_offs_symbol_new_line equ 173 ;смещение символа новой строки
+;------------------------------------------------------------------------------
+
+
+
+; *** scroll bar constant ***
+sb_offs_size_x   equ  0
+sb_offs_start_x  equ  2
+sb_offs_size_y   equ  4
+sb_offs_start_y  equ  6
+sb_offs_max_area equ 16
+sb_offs_cur_area equ 20
+sb_offs_position equ 24
+sb_offs_bckg_col equ 28
+sb_offs_frnt_col equ 32
+sb_offs_line_col equ 36
+sb_offs_redraw   equ 40
+sb_offs_delta2   equ 46
+sb_offs_all_redraw equ 80
+;------------------------------------------------------------------------------
+
+
+struc scrollbar xsize, xpos, ysize, ypos, btn_height, max, cur, pos, bgcol, frcol, linecol, ar_offset
+{
+.x_size         dw xsize
+.x_pos          dw xpos
+.y_size         dw ysize
+.y_pos          dw ypos
+.btn_height     dd btn_height
+.type           dd ?
+.max_area       dd max
+.cur_area       dd cur
+.position       dd pos
+.bg_color       dd bgcol
+.front_color    dd frcol
+.line_color     dd linecol
+.redraw         dd ?
+.delta          dw ?
+.delta2         dw ?
+.r_size_x       dw ?
+.r_start_x      dw ?
+.r_size_y       dw ?
+.r_start_y      dw ?
+.m_pos          dd ?
+.m_pos_2        dd ?
+.m_keys         dd ?
+.run_size       dd ?
+.position2      dd ?
+.work_size      dd ?
+.all_redraw     dd ?
+.ar_offset      dd ar_offset
+}
+
+; *** ProgressBar  constants *** ;
+PB_VALUE          equ +0
+PB_LEFT           equ +4
+PB_TOP            equ +8
+PB_WIDTH          equ +12
+PB_HEIGHT         equ +16
+PB_STYLE          equ +20
+PB_MIN            equ +24
+PB_MAX            equ +28
+PB_BACK_COLOR     equ +32
+PB_PROGRESS_COLOR equ +36
+PB_FRAME_COLOR    equ +40
+
+; *** Frame constants *** ;
+FR_STYLE         equ +0  ; Dword
+FR_WIDTH         equ +4  ; Word
+FR_LEFT          equ +6  ; Word
+FR_HEIGHT        equ +8  ; Word
+FR_TOP           equ +10 ; Word
+FR_OUTER_COLOR   equ +12 ; Dword
+FR_INNER_COLOR   equ +16 ; Dword
+FR_FLAGS         equ +20 ; Dword
+FR_TEXT          equ +24 ; Dword
+FR_TEXT_POSITION equ +28 ; Dword
+FR_FONT          equ +32 ; Dword
+FR_FONT_HEIGHT   equ +36 ; Dword
+FR_FORE_COLOR    equ +40 ; Dword
+FR_BACK_COLOR    equ +44 ; Dword
+
+; FR_FLAGS = [x][yyy][z]
+; z        -  Caption
+; yyy      -  BorderStyle
+; x        -  BackStyle
+FR_CAPTION equ 00001b ; [z]
+FR_DOUBLE  equ 00000b ; [yyy]
+FR_RAISED  equ 00010b ; [yyy]
+FR_SUNKEN  equ 00100b ; [yyy]
+FR_ETCHED  equ 00110b ; [yyy]
+FR_RIDGED  equ 01000b ; [yyy]
+FR_FILLED  equ 10000b ; [x]
+
+; FR_TEXT_POSITION
+FR_TEXT_POS_BOTTOM equ 1
+FR_TEXT_POS_TOP    equ 0
+
+;-----------------------------------------------------------------------------
+
+struc tooltip txt, next, zone_x, zone_w, zone_y, zone_h, col_txt, col_bkg, tm_wait
+{
+    .txt     dd  txt   ; указатель на текст asciiz, разделитель \r 13
+    .next    dd  next	; следующиий tooltip в цепочке или 0
+    .zone_y  dw  zone_y   ; зона контроля (в 90% случаев совпадает с размером контрола)
+    .zone_x  dw  zone_x   ;
+    .zone_h  dw  zone_h   ;
+    .zone_w  dw  zone_w   ;
+    .col_txt dd  col_txt   ; цвет текста тултипа, включая размер SysFn4
+    .col_bkg dd  col_bkg   ; цвет фона тултипа
+    .tm_wait dw  tm_wait   ; время ожидания х10мс
+;временные переменные
+    .font_sz dd  ?   ; font size
+    .mouse   dd  ?   ; предыдущее положение (x, y)
+    .tm_strt dd  ?   ; время запуска таймера (входа мыши в зону) х10мс
+    .video   dd  ?   ; память для сохраненного под тултипом
+    .video_y dw  ?    ; координаты запомненной области экрана, или 0 если пусто
+    .video_x dw  ?
+    .video_h dw  ?    ; размер предрасчитывается при init
+    .video_w dw  ?
+}
