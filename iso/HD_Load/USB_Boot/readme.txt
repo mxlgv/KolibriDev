@@ -1,48 +1,46 @@
-В комплект поставки входят:
-BOOT_F32.BIN - бутсектор для FAT32;
-MTLD_F32 - вспомогательный файл загрузчика;
-inst.exe - установщик под линейку WinNT+;
-setmbr.exe - устанавливает стандартный MBR (читайте ниже);
-readme.txt - этот файл.
+BOOT_F32.BIN - bootsector for FAT32;
+MTLD_F32 - auxiliary loader file;
+inst.exe - installer for WinNT+;
+setmbr.exe - installs standard MBR (read below);
+readme.txt - this file.
 
-Для установки необходима флешка с файловой системой FAT32, свободного места
-на которой достаточно для размещения файла kolibri.img и плюс ещё пара Кб
-на загрузчик.
+To install, flash with FAT32 file system, with free space available for
+file kolibri.img and a couple of Kb for loader, is required.
 
-Установка для пользователей WinNT+:
-Запускаете inst.exe, появляется список подключённых флешек, выбираете
-ту, на которую хотите установить, и дважды щёлкаете по ней. Об успехе программа
-сообщит. О неуспехе (не удалось прочитать/записать на диск или диск не
-является FAT32-томом) - тоже.
-Копируете на флешку файл kolibri.img с нужной вам версией
-дистрибутива. (Эти два действия можно осуществлять в любом порядке.)
-Теперь с флешки можно грузиться.
+Installation for WinNT+ users:
+Run inst.exe, it will display a list of connected flash drives. Select
+the drive, on which you want to install, and double-click on it.
+The program will report success or fail (cannot read/write to drive or
+drive is not FAT32-volume).
+Copy to the flash the file kolibri.img with wanted distribution kit version.
+(These two actions can be done in any order.)
+Now you can boot from this flash drive.
 
-Я столкнулся с ситуацией, когда (недавно выпущенная) флешка отказывается
-загружаться, выдавая сообщение "Pen drive Without Operating System.Remove
-Pen Drive And Reboot." Если вместо загрузки появляется
-такое же или подобное сообщение, скорее всего, поможет setmbr.exe.
-Его нужно запускать с правами администратора. После запуска в появившемся
-списке нужно дважды щёлкнуть по диску, соответствующему вашей флешке.
-Об успехе и неуспехе программа сообщит.
+I have encountered situation, when (recently released) flash does not boot
+and displays message "Pen drive Without Operating System.Remove
+Pen Drive And Reboot." If instead of booting you see the same or like message,
+probably setmbr.exe can help. It must be runned with administrator rights.
+After loading in the appeared list double-click on the drive corresponding to
+your flash drive. Program will report success or fail.
 
-Установка для пользователей других операционных систем:
-автоматическая - пока не поддерживается. Если вы умеете работать с редактором
-дисков, вам помогут следующие сведения: inst.exe при установке делает
-следующее:
-- считывает бутсектор, убеждается, что он действительно FAT32;
-- копирует на флешку файл MTLD_F32, попутно устанавливая ему атрибуты
-"скрытый","системный","только для чтения" (для самого загрузчика атрибуты
-роли не играют, это чтобы файл не лез на глаза кому не надо);
-- считывает файл BOOT_F32.BIN; в прочитанных данных заменяет параметры
-начиная со смещения 3 и заканчивая 0x5A (0x57 байт) из бутсектора флешки;
-- то, что получилось, записывает назад в бутсектор флешки,
-а также в резервную копию бутсектора, если она есть (поле размером в 2 байта
-со смещением 0x32) (резервную копию менять на самом деле необязательно,
-всё равно в реальной жизни она не нужна).
+Installation for users of other operating systems:
+automatic - not supported yet. If you can work with disk editor, the following
+information may help you: inst.exe does following:
+- reads bootsector, checks that it specifies FAT32;
+- copies to the flash the file MTLD_F32, at the same time sets attributes
+"hidden","system","read-only" (they do not play any role for the loader itself,
+they protect the file from unnecessary curiosity);
+- reads the file BOOT_F32.BIN; in its data replaces volume parameters
+from offset 3 to offset 0x5A (0x57 bytes) to parameters taken from current
+bootsector;
+- writes obtained data back to flash bootsector, and also in backup copy of
+bootsector, if it is present (the 2-byte field on offset 0x32)
+(backup copy indeed is not required to be modified, in real life it is not
+used).
 
-Например, под Linux новый бутсектор на диск /dev/sdb1 (замените на устройство,
-соответствующее FAT32-тому) можно установить последовательностью из двух команд:
+Under Linux a new bootsector can be installed to the drive /dev/sdb1 (replace
+with a name of FAT32-volume of any device you want) with the sequence of
+two following commands:
 dd if=/dev/sdb1 of=BOOT_F32.BIN bs=1 skip=3 seek=3 count=87 conv=notrunc
 dd if=BOOT_F32.BIN of=/dev/sdb1 bs=512 count=1 conv=notrunc
-Копирование файлов mtld_f32 и kolibri.img осуществляется обычным способом.
+Files mtld_f32 and kolibri.img must be copied as usual.
