@@ -1,1 +1,0 @@
-bcdedit /delete {AA48ABEF-FF35-4f09-874F-4CFF92467DC4}
