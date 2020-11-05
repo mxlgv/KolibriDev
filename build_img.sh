@@ -8,6 +8,13 @@ wget https://builds.kolibrios.org/eng/data/kernel/trunk/kernel.mnt
 mv kernel.mnt KERNEL.MNT
 cd ..
 
+# CHECK IMG_DIR SIZE
+size=$(du -shb build_img | cut -f1)
+if (( $size > 1474560 )); then
+    zenity --error --text="Error! Files do not fit into the image!" --no-wrap
+    exit
+fi
+
 # BUILD IMAGE
 mkdir tmp
 dd if=/dev/zero of=$ISO_DIR/kolibri.img bs=1k count=1440
