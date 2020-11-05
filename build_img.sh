@@ -1,12 +1,15 @@
 #!/bin/bash
 IMG_DIR=build_img
 ISO_DIR=build_iso
+KERNEL_DIR="src/kernel"
 
-# DOWNLOAD KERNEL
-cd build_img
-wget https://builds.kolibrios.org/eng/data/kernel/trunk/kernel.mnt
-mv kernel.mnt KERNEL.MNT
-cd ..
+# BUILD KERNEL
+cd $KERNEL_DIR
+make clean 
+env lang=en make
+cp -f bin/boot_fat12.bin ../..
+../../tools/kerpack bin/kernel.mnt ../../$IMG_DIR/KERNEL.MNT
+cd ../..
 
 # CHECK IMG_DIR SIZE
 size=$(du -shb build_img | cut -f1)
