@@ -11,4 +11,6 @@ echo "====Build ISO===="
 cd $ISO_DIR
 mkisofs -U -J -pad -b kolibri.img -c boot.catalog -hide-joliet boot.catalog -graft-points -o ../kolibri.iso ./
 cd ..
-sleep 100
+
+
+# THIS FILE WRITED BY MAXCODEHACK
