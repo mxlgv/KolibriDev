@@ -5,7 +5,7 @@ status=$(VBoxManage list vms | grep "KolibriDE")
 if [ -z "$status" ]
 then
     echo "Creating a virtual machine..."
-    VBoxManage createvm --name $MACHINENAME --ostype "Linux32" --register
+    VBoxManage createvm --name $MACHINENAME --ostype "other" --register
     # Установить память и сеть
     VBoxManage modifyvm $MACHINENAME --ioapic on
     VBoxManage modifyvm $MACHINENAME --memory 1024 --vram 128
