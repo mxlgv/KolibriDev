@@ -1,6 +1,4 @@
 #0  **** MAIN ****
-Game Center               /sys/allgames
-Demos              >      /@1
 Graphics           >      /@3
 Multimedia         >      /@4
 Development        >      /@5
@@ -12,27 +10,7 @@ Help                      /sys/docpack
 Run                       /sys/run
 Shutdown                  /sys/end
 #1  **** DEMOS ****
-3D                 >      /@2
-Circle                    /sys/demos/circle
-Fractal                   /sys/demos/tinyfrac
-Color demo                /sys/demos/colorref
-Eyes                      /sys/demos/eyes
-Tube                      /sys/demos/tube
-Plasma                    /sys/demos/plasma
-Spiral                    /sys/demos/spiral
-Moveback                  /sys/demos/movback
-TranTest                  /sys/demos/trantest
-WEB                       /sys/demos/web
-FireWork                  /sys/demos/firework
-UnvWater                  /sys/demos/unvwater
 #2  **** 3D demos ****
-ScreenSaver               /sys/3d/crownscr
-3D-labyrinth              /sys/3d/free3d04
-3D-cube                   /sys/3d/3dcube2
-Ray tracing               /sys/3d/ray
-View3DS                   /sys/3d/view3ds
-Gears                     /sys/3d/gears
-3D-waved area             /sys/3d/3dwav
 #3  **** GRAPHICS ****
 Kolibri Image Viewer      /sys/media/kiv
 zSea* Image Viewer        /kolibrios/media/zsea/zsea
@@ -57,11 +35,6 @@ Key ASCII-codes           /sys/develop/keyascii
 Key SCAN-codes            /sys/develop/scancode
 #6 **** EMULATORS ****
 DOSBox* (DOS PC)          /kolibrios/emul/DosBox/dosbox
-e80* (ZX Spectrum)        /kolibrios/emul/e80/e80
-FCE Ultra* (NES)          /kolibrios/emul/fceu/fceu
-Gameboy Color*            /kolibrios/emul/gameboy
-ScummVM* (adventure)      /kolibrios/emul/scummvm
-ZSNES* (super Nintendo)   /kolibrios/emul/zsnes
 #7  **** SYSTEM ****
 File Management    >      /@8
 Accessibility      >      /@9
@@ -74,8 +47,6 @@ Task manager              /sys/cpu
 System panel              /sys/syspanel
 #8 **** FILE MANAGEMENT ****
 KFAR                      /sys/File Managers/kfar
-fNav                      /sys/File Managers/fNav/fNav
-KFM                       /sys/File Managers/kfm
 Eolite                    /sys/File Managers/Eolite
 Virtual disks             /sys/tmpdisk
 Shell                     /sys/shell
