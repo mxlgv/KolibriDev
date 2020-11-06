@@ -29,6 +29,7 @@ Flat Assembler            /sys/develop/fasm
 Diff Tool                 /sys/develop/diff
 Debug Board               /sys/develop/board
 Debugger                  /sys/develop/mtdbg
+Disassembler              /kolibrios/develop/ud86/ud86
 Base Converter            /sys/develop/h2d2b
 Character table           /sys/ASCIIVju
 Key ASCII-codes           /sys/develop/keyascii
@@ -56,6 +57,8 @@ Screen magnifier          /sys/magnify
 Screen keyboard           /sys/zkey
 #10 **** DATA PROCESSING ****
 Calculator                /sys/calc
+TinyTextEditor            /kolibrios/develop/editors/tte
+Neon                      /kolibrios/develop/editors/neon
 Tinypad                   /sys/tinypad
 TextEdit                  /sys/develop/t_edit
 Table processor           /sys/table
@@ -68,6 +71,7 @@ Servers            >      /@13
 Network devices           /sys/network/netcfg
 Network status            /sys/network/netstat
 #12 **** CLIENTS ****
+NetSurf                   /kolibrios/netsurf/netsurf
 IRC                       /sys/network/ircc
 FTP                       /sys/network/ftpc
 TFTP                      /sys/network/tftpc
@@ -81,7 +85,7 @@ Text-based browser        /sys/network/webview
 #13 **** SERVERS ****
 FTP                       /sys/network/ftpd
 #14 **** OTHER ****
-Emulators*         >      /@6
+Emulators         >      /@6
 Analog clock              /sys/demos/aclock
 Binary clock              /sys/demos/bcdclk
 Timer                     /sys/demos/timer
