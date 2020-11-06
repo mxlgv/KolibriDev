@@ -15,7 +15,7 @@
 /SYS/NETWORK/@ZEROCONF	""	0	# Network configuration
 /SYS/@VOLUME		""	0	# Start volume daemon
 /SYS/@SS		ASSM	0	# Screensaver
-/SYS/@DOCKY		""	0	# Start docky
+#/SYS/@DOCKY		""	0	# Start docky
 /SYS/TMPDISK		A0	-1	# Add virtual RAM disk /tmp0/1
 /SYS/SEARCHAP		""	-1	# Search and mount additional system directory
 /SYS/@HOTANGLES         ""      0       # Start Hot Angles
