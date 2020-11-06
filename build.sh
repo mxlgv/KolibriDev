@@ -16,7 +16,8 @@ cd ../..
 ########## CHECK IMG SIZE ###########
 size=$(du -shb build_img | cut -f1)
 if (( $size > 1474560 )); then
-    zenity --error --text="Error! Files do not fit into the image!" --no-wrap
+    echo -e "\033[0;31m Error! Files do not fit into the image! \033[0;0m"
+    read -s -n 1
     exit
 fi
 
@@ -37,7 +38,7 @@ sudo rm -rf tmp
 ############# BUILD ISO #############
 echo "====Build ISO===="
 cd $ISO_DIR
-mkisofs -U -J -pad -b kolibri.img -c boot.catalog -hide-joliet boot.catalog -graft-points -o ../kolibri.iso ./
+mkisofs -U -J -pad -b kolibri.img -c boot.catalog -hide-joliet boot.catalog -graft-points -A "KolibriDE AutoBuilder" -publisher "KolibriDE Team" -o ../kolibri.iso ./
 cd ..
 
 #
