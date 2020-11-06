@@ -41,6 +41,9 @@ cd $ISO_DIR
 mkisofs -U -J -pad -b kolibri.img -c boot.catalog -hide-joliet boot.catalog -graft-points -A "KolibriDE AutoBuilder" -publisher "KolibriDE Team" -o ../kolibri.iso ./
 cd ..
 
+#############   CLEAN   ##############
+./clean.sh
+
 #
 # THIS FILE WAS WRITTEN BY TURBOCAT2001, MAXCODEHACK, RGIMAD
 #
