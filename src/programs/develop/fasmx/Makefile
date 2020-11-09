@@ -1,4 +1,4 @@
-KPACK=../../tools/kpack
+KPACK=../../../../tools/kpack
 FASM=fasm
 LD = kos32-ld
 OBJCOPY=kos32-objcopy
@@ -23,7 +23,7 @@ all:
 	
 install:
 	$(KPACK) fasmx
-	cp fasmx ../../build_iso/kolibrios/develop/fasm
+	cp fasmx ../../../../build_iso/kolibrios/develop/fasm
 clean:
 	rm -f fasmx *.o
 
