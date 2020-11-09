@@ -2,6 +2,7 @@
 IMG_DIR=build_img
 ISO_DIR=build_iso
 KERNEL_DIR="src/kernel"
+FASMX_DIR="src/fasmx"
 
 ########### BUILD KERNEL ############
 echo -e "\n====Build Kernel====\n"
@@ -12,6 +13,13 @@ cp -f bin/boot_fat12.bin ../..
 ../../tools/kerpack bin/kernel.mnt ../../$IMG_DIR/KERNEL.MNT
 cd ../..
 
+echo -e "\n====Build FasmX====\n"
+########## BUILD FASMX #############
+cd $FASMX_DIR
+make 
+make install
+make clean
+cd ../..
 
 ########## CHECK IMG SIZE ###########
 size=$(du -shb build_img | cut -f1)
