@@ -22,5 +22,5 @@ install:
 	$(KPACK) fasmx
 	cp fasmx ../../build_iso/kolibrios/develop/fasm
 clean:
-	rm -f fasm.o fasmx
+	rm -f fasmx *.o
 
