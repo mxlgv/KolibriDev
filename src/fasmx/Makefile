@@ -4,10 +4,13 @@ LD = kos32-ld
 OBJCOPY=kos32-objcopy
 STRIP=kos32-strip 
 CC=kos32-gcc
- 
-SDK_DIR:= /usr/local/kos32/sdk
+
+ifndef SDK_DIR
+SDK_DIR=/home/autobuild/tools/win32/sdk
+endif
+	
 LDFLAGS =-call_shared -nostdlib -T $(SDK_DIR)/sources/newlib/app-dynamic.lds --image-base 0  --subsystem console
-LIBPATH:= -L $(SDK_DIR)/lib -L $(SDK_DIR)/../lib
+LIBPATH:= -L $(SDK_DIR)/lib -L $(SDK_DIR)/../lib -L $(SDK_DIR)/../mingw32/lib
 CFLAGS = -c -fno-ident -O2 -fomit-frame-pointer -fno-ident -U__WIN32__ -U_Win32 -U_WIN32 -U__MINGW32__ -UWIN32
 INCLUDES= -I $(SDK_DIR)/sources/newlib/libc/include
 
