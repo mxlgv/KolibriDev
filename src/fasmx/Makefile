@@ -1,4 +1,4 @@
-KPACK=kpack
+KPACK=../../tools/kpack
 FASM=fasm
 LD = kos32-ld
 OBJCOPY=kos32-objcopy
