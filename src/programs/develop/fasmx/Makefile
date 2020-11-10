@@ -23,7 +23,7 @@ INCLUDES = -I $(SDK_DIR)/sources/newlib/libc/include
 all:
 	$(FASM) $(NAME).asm
 	$(CC) $(CFLAGS) $(INCLUDES) write.c
-	$(LD) $(LDFLAGS) $(LIBPATH) -o $(NAME)xzz $(NAME).o write.o -lgcc -lc.dll
+	$(LD) $(LDFLAGS) $(LIBPATH) -o $(NAME)x $(NAME).o write.o -lgcc -lc.dll
 	$(STRIP) -s $(NAME)x -o fasmx
 	$(OBJCOPY) $(NAME)x -O binary
 	
