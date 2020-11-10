@@ -6,7 +6,7 @@
 ;                                                  ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
  
-format binary as ""                     ; Binary file format without extension
+format binary as "kex"                     ; Binary file format without extension
 
 use32                                   ; Tell compiler to use 32 bit instructions
  
