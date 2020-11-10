@@ -13,7 +13,7 @@ Shutdown                  /sys/end
 #2  **** 3D demos ****
 #3  **** GRAPHICS ****
 Kolibri Image Viewer      /sys/media/kiv
-zSea* Image Viewer        /kolibrios/media/zsea/zsea
+zSea Image Viewer         /kolibrios/media/zsea/zsea
 Animage                   /sys/media/animage
 Image Filtering           /sys/media/imgf/imgf
 Palitra                   /sys/media/palitra
@@ -21,7 +21,7 @@ Pipet                     /sys/develop/pipet
 #4  **** MULTIMEDIA ****
 Pixie AudioPlayer         /sys/media/pixie
 AC97SND Audioplayer       /sys/media/ac97snd
-Fplay* Video player       /kolibrios/media/fplay
+Fplay Video player        /kolibrios/media/fplay
 MidAMP                    /sys/media/midamp
 #5 **** DEVELOPMENT ****
 KPack Archiver            /sys/kpack
@@ -35,7 +35,7 @@ Character table           /sys/ASCIIVju
 Key ASCII-codes           /sys/develop/keyascii
 Key SCAN-codes            /sys/develop/scancode
 #6 **** EMULATORS ****
-DOSBox* (DOS PC)          /kolibrios/emul/DosBox/dosbox
+DOSBox (DOS PC)           /kolibrios/emul/DosBox/dosbox
 #7  **** SYSTEM ****
 File Management    >      /@8
 Accessibility      >      /@9
@@ -85,7 +85,7 @@ Text-based browser        /sys/network/webview
 #13 **** SERVERS ****
 FTP                       /sys/network/ftpd
 #14 **** OTHER ****
-Emulators         >      /@6
+Emulators         >       /@6
 Analog clock              /sys/demos/aclock
 Binary clock              /sys/demos/bcdclk
 Timer                     /sys/demos/timer
