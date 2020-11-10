@@ -13,8 +13,8 @@ cp -f bin/boot_fat12.bin ../..
 ../../tools/kerpack bin/kernel.mnt ../../$IMG_DIR/KERNEL.MNT
 cd ../..
 
-echo -e "\n====Build FasmX====\n"
 ########## BUILD FASMX #############
+echo -e "\n====Build FasmX====\n"
 cd $FASMX_DIR
 make 
 make install
