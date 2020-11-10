@@ -51,7 +51,7 @@ mkisofs -U -J -pad -b kolibri.img -c boot.catalog -hide-joliet boot.catalog -gra
 cd ..
 
 #############   CLEAN   ##############
-./clean.sh > /dev/null
+./clean > /dev/null
 
 read -s -n 1
 

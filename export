@@ -1,0 +1,3 @@
+#!/bin/bash
+export LIB_DIR=/usr/local/kos32/lib
+export SDK_DIR=/usr/local/kos32/sdk
