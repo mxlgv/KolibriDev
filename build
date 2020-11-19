@@ -3,6 +3,7 @@ IMG_DIR=build_img
 ISO_DIR=build_iso
 KERNEL_DIR="src/kernel"
 FASMX_DIR="src/programs/develop/fasmx"
+KOSJS_DIR="src/programs/develop/kosjs"
 
 ########### BUILD KERNEL ############
 echo -e "\n====Build Kernel====\n"
@@ -16,6 +17,14 @@ cd ../..
 ########## BUILD FASMX #############
 echo -e "\n====Build FasmX====\n"
 cd $FASMX_DIR
+make 
+make install
+make clean
+cd ../../../..
+
+########## BUILD KOSJS #############
+echo -e "\n====Build KosJS====\n"
+cd $KOSJS_DIR
 make 
 make install
 make clean
