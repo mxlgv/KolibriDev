@@ -7,7 +7,7 @@
 ;; Author: Halyavin Andrey, halyavin@land.ru                    ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-$Revision: 6240 $
+$Revision: 8224 $
 
 struct FRB
         list            LHEAD

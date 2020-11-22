@@ -7,8 +7,8 @@ KOSJS_DIR="src/programs/develop/kosjs"
 
 ########### BUILD KERNEL ############
 echo -e "\n====Build Kernel====\n"
+svn co svn://kolibrios.org/kernel/trunk/ $KERNEL_DIR
 cd $KERNEL_DIR
-make clean > /dev/null
 env lang=en make
 cp -f bin/boot_fat12.bin ../..
 ../../tools/kerpack bin/kernel.mnt ../../$IMG_DIR/KERNEL.MNT

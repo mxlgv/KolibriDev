@@ -5,7 +5,7 @@
 ;;                                                              ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-$Revision: 8115 $
+$Revision: 8217 $
 
 
 dpl0    =  10010000b      ; data read       dpl0
@@ -334,11 +334,6 @@ PAT_TYPE_UCM        = 7
 PAT_VALUE           = 0x00070106; (UC<<24)|(UCM<<16)|(WC<<8)|WB
 
 MAX_MEMMAP_BLOCKS   = 32
-
-TMP_FILE_NAME       =     0
-TMP_CMD_LINE        =  1024
-TMP_ICON_OFFS       =  1280
-
 
 EVENT_REDRAW       = 0x00000001
 EVENT_KEY          = 0x00000002
@@ -702,7 +697,8 @@ struct  boot_data
         bank_switch     dd ?    ; Vesa 1.2 pm bank switch
         lfb             dd ?    ; Vesa 2.0 LFB address
         mtrr            db ?    ; 0 or 1: enable MTRR graphics acceleration
-        launcher_start  db ?    ; 0 or 1: start the first app (right now it's LAUNCHER) after kernel is loaded
+        launcher_start  db ?    ; 0 or 1: start the first app (right now it's
+                                ; LAUNCHER) after kernel is loaded
         debug_print     db ?    ; if nonzero, duplicates debug output to the screen
         dma             db ?    ; DMA write: 1=yes, 2=no
         pci_data        rb 8

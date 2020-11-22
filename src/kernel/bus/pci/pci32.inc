@@ -30,8 +30,7 @@ $Revision: 7136 $
 ;   Description
 ;       entry point for system PCI calls
 ;***************************************************************************
-mmio_pci_addr  =  0x400               ; set actual PCI address here to activate user-MMIO 
-; bbbbbbbb dddddfff (bus-device-function). mmio_pci_addr - 16 bits or 4 bytes. 0x400 means bus4 device0 func0
+;mmio_pci_addr  =  0x400               ; set actual PCI address here to activate user-MMIO
 
 iglobal
 align 4
@@ -52,7 +51,7 @@ if defined mmio_pci_addr
         dd      pci_mmio_map            ;12
         dd      pci_mmio_unmap          ;13
 end if
-        mmio_pci_addr_val dw ?
+
 endg
 
 align 4
@@ -365,15 +364,14 @@ if defined mmio_pci_addr        ; must be set above
 ;   Returns  eax = user heap space available (bytes)
 ;   Error codes
 ;       eax = -1 : PCI user access blocked,
-;       ///////////////eax = -2 : device not registered for uMMIO service
+;       eax = -2 : device not registered for uMMIO service
 ;       eax = -3 : user heap initialization failure
 ;***************************************************************************
 pci_mmio_init:
-        ; cmp     bx, mmio_pci_addr
-        ; jz      @f
-        ; mov     eax, -2
-        ; ret
-        mov [mmio_pci_addr_val], bx
+        cmp     bx, mmio_pci_addr
+        jz      @f
+        mov     eax, -2
+        ret
 @@:
         call    init_heap  ; (if not initialized yet)
         or      eax, eax
@@ -427,7 +425,7 @@ pci_mmio_map:
         shl     bl, 1
         shl     bl, 1
         add     bl, 0x10; now bl = BAR offset in PCI config. space
-        mov     ax, [mmio_pci_addr_val]
+        mov     ax, mmio_pci_addr
         mov     bh, al  ; bh = dddddfff
         mov     al, 2   ; al : DW to read
         call    pci_read_reg
@@ -463,9 +461,9 @@ mmio_map_over:
         pop     edx     ; edx = MMIO shift (pages)
         shl     edx, 12 ; edx = MMIO shift (bytes)
         add     eax, edx; eax = uMMIO physical address
-        or      eax, 0x200; PG_SHARED
-        or      eax, 0x007 ; PG_UW
-        or      eax, 0x018 ; PG_NOCACHE
+        or      eax, PG_SHARED
+        or      eax, PG_UW
+        or      eax, PG_NOCACHE
         mov     edi, ebx
         call    commit_pages
         mov     eax, edi

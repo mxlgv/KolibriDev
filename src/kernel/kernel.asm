@@ -71,7 +71,7 @@ format binary as "mnt"
 include 'macros.inc'
 include 'struct.inc'
 
-$Revision: 8139 $
+$Revision: 8216 $
 
 
 USE_COM_IRQ     = 1      ; make irq 3 and irq 4 available for PCI devices
@@ -1746,6 +1746,15 @@ sys_getsetup:
         dec     ecx
         jnz     .shift
 
+        ; if given memory address belongs to kernel then error
+        push    ebx 
+        mov     eax, ebx
+        mov     ebx, 128
+        call    is_region_userspace
+        pop     ebx
+        test    eax, eax
+        jz      .addr_error
+
         mov     eax, keymap
         mov     ecx, 128
         call    memmove
@@ -1756,6 +1765,14 @@ sys_getsetup:
         dec     ecx
         jnz     .alt
 
+        push    ebx 
+        mov     eax, ebx
+        mov     ebx, 128
+        call    is_region_userspace
+        pop     ebx
+        test    eax, eax
+        jz      .addr_error
+
         mov     eax, keymap_shift
         mov     ecx, 128
         call    memmove
@@ -1765,6 +1782,14 @@ sys_getsetup:
 ; 3 = layout with pressed Alt
         dec     ecx
         jne     .country
+
+        push    ebx 
+        mov     eax, ebx
+        mov     ebx, 128
+        call    is_region_userspace
+        pop     ebx
+        test    eax, eax
+        jz      .addr_error
 
         mov     eax, keymap_alt
         mov     ecx, 128
@@ -1779,6 +1804,10 @@ sys_getsetup:
         movzx   eax, word [keyboard]
         mov     [esp+32], eax
         ret
+
+.addr_error:    ; if given memory address is illegal
+        mov     eax, -1
+        ret        
 ;--------------------------------------
 @@:
 ; F.26.5 - get system language
@@ -3935,7 +3964,7 @@ delay_ms:     ; delay in 1/1000 sec
         cmp     [hpet_base], 0
         jz      .no_hpet
         mov     eax, esi
-        mov     edx, 10_000_000 ; cs to ns
+        mov     edx, 1_000_000 ; ms to ns
         mul     edx
         mov     ebx, edx
         mov     ecx, eax
@@ -5634,11 +5663,32 @@ sys_apm:
 ; -----------------------------------------
 
 align 4
-
 undefined_syscall:                      ; Undefined system call
         mov     [esp + 32], dword -1
         ret
 
+align 4
+; check if given memory region lays in lower 2gb (userspace memory) or not
+is_region_userspace:
+; in:  eax = base
+;      ebx = len
+; out: eax = 1 if region in userspace memory, 0 if not
+        push    esi edi ecx
+
+        cmp     eax, OS_BASE
+        ja      @f
+
+        add     eax, ebx
+        cmp     eax, OS_BASE
+        ja      @f
+
+        mov     eax, 1
+        jmp     .ret
+@@:
+        xor     eax, eax
+.ret:
+        pop     ecx edi esi
+        ret 
 
 if ~ lang eq sp
 diff16 "end of .text segment",0,$

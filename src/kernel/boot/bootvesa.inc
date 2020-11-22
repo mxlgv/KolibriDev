@@ -5,7 +5,7 @@
 ;;                                                              ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-$Revision: 7136 $
+$Revision: 8175 $
 
 struc VBE_VGAInfo {
   .VESASignature          dd ?    ; char
@@ -481,8 +481,10 @@ end if
         jne     .next
         cmp     bx, word [es:si+2]
         jne     .next
+        jcxz    @f
         cmp     cx, word [es:si+8]
         jne     .next
+@@:
         xor     ax, ax
         ret
 .next:
