@@ -2,6 +2,7 @@
 ### Description
 KolibriOS DE is a fork of the official version, created to prove that development in the OS itself is possible!
 ### Differences from the official
+
 **Added:**
 
 - FasmX(console version Fasm)
@@ -21,7 +22,7 @@ KolibriOS DE is a fork of the official version, created to prove that developmen
 - Header files for fasm libraries
 - New wallpapers and icons
 
-** Removed: **
+**Removed:**
 
 - All demos and games
 - Some emulators
@@ -30,10 +31,10 @@ KolibriOS DE is a fork of the official version, created to prove that developmen
 
 ### Building and getting
 
-** Getting: ** 
+**Getting:** 
 You can get the finished ISO image on the [releases page](https://github.com/turbocat2001/KolibriOS-DE/releases)
 
-** Building in Linux: ** 
+**Building in Linux:** 
 
 To build you need: fasm, gcc-toolchain (sdk and kos32-gcc). If the SDK is located at "/home/autobuild/tools/win32/sdk" and the libraries are at "/home/autobuild/tools/win32/mingw32/lib", then continue. 
 If not, then execute:
