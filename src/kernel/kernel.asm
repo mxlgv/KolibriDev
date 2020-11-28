@@ -71,7 +71,7 @@ format binary as "mnt"
 include 'macros.inc'
 include 'struct.inc'
 
-$Revision: 8216 $
+$Revision: 8270 $
 
 
 USE_COM_IRQ     = 1      ; make irq 3 and irq 4 available for PCI devices
@@ -1806,7 +1806,7 @@ sys_getsetup:
         ret
 
 .addr_error:    ; if given memory address is illegal
-        mov     eax, -1
+        mov     dword [esp+32], -1
         ret        
 ;--------------------------------------
 @@:
@@ -2197,6 +2197,13 @@ sysfn_shutdown:          ; 18.9 = system shutdown
                        dd 0x0
   endg
 ;------------------------------------------------------------------------------
+; in: eax -- APPDATA ptr
+; out: Z/z -- is/not kernel thread
+is_kernel_thread:
+        mov     eax, [eax+APPDATA.process]
+        cmp     eax, [SLOT_BASE+2*sizeof.APPDATA+APPDATA.process]       ; OS
+        ret
+;------------------------------------------------------------------------------
 sysfn_terminate:        ; 18.2 = TERMINATE
         push    ecx
         cmp     ecx, 2
@@ -2205,10 +2212,15 @@ sysfn_terminate:        ; 18.2 = TERMINATE
         cmp     ecx, edx
         ja      noprocessterminate
         mov     eax, [TASK_COUNT]
-        shl     ecx, 5
+        shl     ecx, BSF sizeof.TASKDATA
         mov     edx, [ecx+CURRENT_TASK+TASKDATA.pid]
         add     ecx, CURRENT_TASK+TASKDATA.state
-        cmp     byte [ecx], 9
+        cmp     byte [ecx], TSTATE_FREE
+        jz      noprocessterminate
+        push    eax
+        lea     eax, [(ecx-(CURRENT_TASK and 1FFFFFFFh)-TASKDATA.state)*8+SLOT_BASE]
+        call    is_kernel_thread
+        pop     eax
         jz      noprocessterminate
         push    ecx edx
         lea     edx, [(ecx-(CURRENT_TASK and 1FFFFFFFh)-TASKDATA.state)*8+SLOT_BASE]
@@ -2455,11 +2467,21 @@ sysfn_lastkey:          ; 18.12 = return 0 (backward compatibility)
         ret
 ;------------------------------------------------------------------------------
 sysfn_getversion:       ; 18.13 = get kernel ID and version
+        ; if given memory address belongs to kernel then error
+        mov     eax, ecx
+        mov     ebx, version_end-version_inf
+        call    is_region_userspace
+        test    eax, eax
+        jz      .addr_error
+
         mov     edi, ecx
         mov     esi, version_inf
         mov     ecx, version_end-version_inf
         rep movsb
         ret
+.addr_error:    ; if given memory address is illegal
+        mov     dword [esp+32], -1
+        ret   
 ;------------------------------------------------------------------------------
 sysfn_waitretrace:     ; 18.14 = sys wait retrace
      ;wait retrace functions
@@ -3159,6 +3181,14 @@ sys_cpuusage:
 ;  +26 dword     used mem
 ;  +30 dword     PID , process idenfification number
 ;
+        ; if given memory address belongs to kernel then error
+        push    ebx
+        mov     eax, ebx
+        mov     ebx, 0x4C
+        call    is_region_userspace
+        pop     ebx
+        test    eax, eax
+        jz      .addr_error
 
         cmp     ecx, -1 ; who am I ?
         jne     .no_who_am_i
@@ -3248,6 +3278,10 @@ sys_cpuusage:
         mov     eax, [TASK_COUNT]
         mov     [esp+32], eax
         ret
+
+.addr_error:    ; if given memory address is illegal
+        mov     dword [esp+32], -1
+        ret   
 
 align 4
 sys_clock:
