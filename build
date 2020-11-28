@@ -4,6 +4,7 @@ ISO_DIR=build_iso
 KERNEL_DIR="src/kernel"
 FASMX_DIR="src/programs/develop/fasmx"
 KOSJS_DIR="src/programs/develop/kosjs"
+LUA_DIR="src/programs/develop/lua"
 
 ########### BUILD KERNEL ############
 echo -e "\n====Build Kernel====\n"
@@ -25,6 +26,15 @@ cd ../../../..
 ########## BUILD KOSJS #############
 echo -e "\n====Build KosJS====\n"
 cd $KOSJS_DIR
+make 
+make install
+make clean
+cd ../../../..
+
+
+########## BUILD LUA #############
+echo -e "\n==== Build LUA ====\n"
+cd $LUA_DIR
 make 
 make install
 make clean
