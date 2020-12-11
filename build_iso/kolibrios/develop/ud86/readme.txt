@@ -25,4 +25,4 @@ Usage: ud86 [-option[s]] file
   http://udis86.sourceforge.net/
 ____________________________________________________________
 
-Падает при запуске без параметров!
+Порт на newlib - maxcodehack
