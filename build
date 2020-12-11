@@ -6,6 +6,14 @@ FASMX_DIR="src/programs/develop/fasmx"
 KOSJS_DIR="src/programs/develop/kosjs"
 LUA_DIR="src/programs/develop/lua"
 
+######### DOWNLOAD KERNEL ###########
+echo -e "\n====Download Kernel====\n"
+wget https://builds.kolibrios.org/eng/data/kernel/trunk/kernel.mnt
+wget https://builds.kolibrios.org/eng/data/kernel/trunk/bootloader/boot_fat12.bin
+mv kernel.mnt build_img/KERNEL.MNT
+
+: << COMMENTBLOCK
+
 ########### BUILD KERNEL ############
 echo -e "\n====Build Kernel====\n"
 svn co svn://kolibrios.org/kernel/trunk/ $KERNEL_DIR
@@ -13,7 +21,9 @@ cd $KERNEL_DIR
 env lang=en make
 cp -f bin/boot_fat12.bin ../..
 ../../tools/kerpack bin/kernel.mnt ../../$IMG_DIR/KERNEL.MNT
-cd ../..
+cd ../.. 
+
+COMMENTBLOCK
 
 ########## BUILD FASMX #############
 echo -e "\n====Build FasmX====\n"
@@ -31,14 +41,17 @@ make install
 make clean
 cd ../../../..
 
+: << COMMENTBLOCK
 
 ########## BUILD LUA #############
 echo -e "\n==== Build LUA ====\n"
 cd $LUA_DIR
-make 
-make install
-make clean
+#make 
+#make install
+#make clean
 cd ../../../..
+
+COMMENTBLOCK
 
 ########## CHECK IMG SIZE ###########
 size=$(du -shb build_img | cut -f1)
