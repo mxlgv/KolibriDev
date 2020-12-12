@@ -62,7 +62,7 @@ rm -rf *
 svn co svn://kolibrios.org/programs/develop/ktcc/trunk/bin .  
 svn co svn://kolibrios.org/programs/develop/ktcc/trunk/libc/include
 svn co svn://kolibrios.org/programs/develop/ktcc/trunk/samples
-rm -rf kos32-tcc.exe kos32-tcc .svn include/.svn samples/.svn
+rm -rf kos32-tcc.exe kos32-tcc .svn include/.svn samples/.svn samples/Makefile
 cd ../../../../
 
 ########## CHECK IMG SIZE ###########
