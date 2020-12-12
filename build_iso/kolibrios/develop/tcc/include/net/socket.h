@@ -83,7 +83,7 @@ typedef struct{
 }sockaddr; 
 #pragma pack(pop)
 
-#pragma pack(push, 1)
+#pragma pack(push,1)
 typedef struct{
   unsigned int level;
   unsigned int optionname;
@@ -102,6 +102,6 @@ int send(int socket, const void *message, size_t msg_len, int flag);
 int recv(int socket, void *buffer, size_t buff_len, int flag);
 int setsockopt(int socket,const optstruct* opt);
 int getsockopt(int socket, optstruct* opt);
-int socketpair();
+int socketpair(int *sock1, int *sock2);
 
 #endif
