@@ -1,5 +1,5 @@
 #!/bin/bash
-MACHINENAME="KolibriDE"
+MACHINENAME="KolibriDev"
 # Создать ВМ
 status=$(VBoxManage list vms | grep "KolibriDE")
 if [ -z "$status" ]
