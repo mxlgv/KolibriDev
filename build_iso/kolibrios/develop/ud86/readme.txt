@@ -3,7 +3,7 @@
 http://board.kolibrios.org/viewtopic.php?f=45&t=1574&start=15#p36962
 ___________________________________________________________
 
-Usage: ud86 [-option[s]] file
+Usage: udcli [-option[s]] file
   Options:
       -16      : Set the disassembly mode to 16 bits. 
       -32      : Set the disassembly mode to 32 bits. (default)

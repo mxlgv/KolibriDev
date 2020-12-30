@@ -1,6 +1,6 @@
 # KolibriOS Developer Edition
 ### Description
-KolibriOS DE is a fork of the official version, created to prove that development in the OS itself is possible!
+KolibriDev is a fork of the official version Kolibri OS, created to prove that development in the OS itself is possible!
 ### Differences from the official
 
 **Added:**
@@ -32,7 +32,7 @@ KolibriOS DE is a fork of the official version, created to prove that developmen
 ### Building and getting
 
 **Getting:** 
-You can get the finished ISO image on the [releases page](https://github.com/turbocat2001/KolibriOS-DE/releases)
+You can get the finished ISO image on the [releases page](https://github.com/turbocat2001/KolibriDev/releases)
 
 **Building in Linux:** 
 

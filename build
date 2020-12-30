@@ -5,6 +5,7 @@ KERNEL_DIR="src/kernel"
 FASMX_DIR="src/programs/develop/fasmx"
 KOSJS_DIR="src/programs/develop/kosjs"
 LUA_DIR="src/programs/develop/lua"
+TCC_DIR="build_iso/kolibrios/develop/tcc"
 
 ######### DOWNLOAD KERNEL ###########
 echo -e "\n====Download Kernel====\n"
@@ -52,6 +53,17 @@ cd $LUA_DIR
 cd ../../../..
 
 COMMENTBLOCK
+
+
+########## UPDATE TCC ###############
+echo -e "\n==== Update TCC  ====\n"
+cd $TCC_DIR
+rm -rf *
+svn co svn://kolibrios.org/programs/develop/ktcc/trunk/bin .  
+svn co svn://kolibrios.org/programs/develop/ktcc/trunk/libc/include
+svn co svn://kolibrios.org/programs/develop/ktcc/trunk/samples
+rm -rf kos32-tcc.exe kos32-tcc .svn include/.svn samples/.svn samples/Makefile
+cd ../../../../
 
 ########## CHECK IMG SIZE ###########
 size=$(du -shb build_img | cut -f1)
