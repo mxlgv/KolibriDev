@@ -1,6 +1,6 @@
 # KolibriOS Developer Edition
 ### Description
-KolibriDev is a fork of the official version Kolibri OS, created to prove that development in the OS itself is possible!
+KolibriDev is a Kolibri OS distribution built to prove that development in the OS itself is possible!
 ### Differences from the official
 
 **Added:**
