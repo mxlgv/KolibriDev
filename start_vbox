@@ -1,7 +1,7 @@
 #!/bin/bash
 MACHINENAME="KolibriDev"
 # Создать ВМ
-status=$(VBoxManage list vms | grep "KolibriDE")
+status=$(VBoxManage list vms | grep "KolibriDev")
 if [ -z "$status" ]
 then
     echo "Creating a virtual machine..."
