@@ -2,6 +2,7 @@
 #define __SOCKET_H
 
 #include <stddef.h>
+#include <errno.h>
 
 // Socket Types
 #define SOCK_STREAM 1
@@ -21,6 +22,7 @@
 // Address families
 #define AF_UNSPEC 0
 #define AF_LOCAL 1
+#define AF_INET  2 
 #define AF_INET4 2     // IPv4
 #define AF_INET6 10    // IPv6
 
@@ -52,35 +54,15 @@
 //Socket options
 #define SO_BINDTODEVICE (1<<9)
 #define SO_NONBLOCK (1<<31)
-
-// Error Codes
-#define ENOBUFS      1
-#define EINPROGRESS  2
-#define EOPNOTSUPP   4
-#define EWOULDBLOCK  6
-#define ENOTCONN     9
-#define EALREADY     10
-#define EINVALUE     11
-#define EMSGSIZE     12
-#define ENOMEM       18
-#define EADDRINUSE   20
-#define ECONNREFUSED 61
-#define ECONNRESET   52
-#define EISCONN      56
-#define ETIMEDOUT    60
-#define ECONNABORTED 53
-
-
 #define PORT(X) (X<<8)
-extern int err_code;
 
 #pragma pack(push,1)
-typedef struct{
+struct sockaddr{
     unsigned short sin_family;
     unsigned short sin_port; 
     unsigned int sin_addr;
     unsigned long long sin_zero;
-}sockaddr; 
+}; 
 #pragma pack(pop)
 
 #pragma pack(push,1)
@@ -94,10 +76,10 @@ typedef struct{
 
 int socket(int domain, int type, int protocol);
 int close(int socket);
-int bind(int socket, const sockaddr *addres, int addres_len);
+int bind(int socket, const struct sockaddr *addres, int addres_len);
 int listen(int socket, int backlog);
-int connect(int socket, const sockaddr* address, int socket_len);
-int accept(int socket, const sockaddr* address, int address_len);
+int connect(int socket, const struct sockaddr* address, int socket_len);
+int accept(int socket, const struct sockaddr* address, int address_len);
 int send(int socket, const void *message, size_t msg_len, int flag);
 int recv(int socket, void *buffer, size_t buff_len, int flag);
 int setsockopt(int socket,const optstruct* opt);

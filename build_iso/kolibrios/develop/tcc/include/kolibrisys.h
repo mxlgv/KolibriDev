@@ -15,15 +15,15 @@
 #define cdecl   __attribute__ ((cdecl))
 #define stdcall __attribute__ ((stdcall))
 //#endif
-
+typedef void* func_ptr;
 typedef unsigned int dword;
 typedef unsigned char byte;
 typedef unsigned short word;
 
 typedef unsigned int fpos_t;
 typedef unsigned int size_t;
-
-typedef struct process_table_entry{
+#pragma pack(push,1)
+struct process_table_entry{
   int cpu_usage;             //+0
   int window_pos_info;       //+4
   short int reserved1;       //+8
@@ -43,7 +43,8 @@ typedef struct process_table_entry{
   int clientheight;          //+66
   unsigned char window_state;//+70
   char reserved3[1024-71];   //+71
-}__attribute__((packed));
+};
+#pragma pack(pop)
 
 //-----------------------------------------------------------------------------------
 //------------------------KolibriOS system acces to files----------------------------
@@ -190,7 +191,7 @@ extern void stdcall _ksys_sound_speaker_play(void* data);
 
 //------------------function for work with Dinamic Link Librarys(DLL)--------------
 extern dword* stdcall _ksys_cofflib_load(char* name);
-extern char* stdcall _ksys_cofflib_getproc(void* exp,char* sz_name);
+extern func_ptr stdcall _ksys_cofflib_getproc(void* exp,char* sz_name);
 //---------------------------------------------------------------------------------
 
 #endif

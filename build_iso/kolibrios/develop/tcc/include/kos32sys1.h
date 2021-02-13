@@ -31,15 +31,23 @@ extern "C" {
 #define SHM_WRITE       0x01
    
 // for clipboard funtions    
-#define UTF 0
-#define CP866 1
-#define CP1251 2
-#define TEXT 0
-#define IMAGE 1
-#define RAW 2
+#define CLIP_UTF 0
+#define CLIP_CP866 1
+#define CLIP_CP1251 2
+#define CLIP_TEXT 0
+#define CLIP_IMAGE 1
+#define CLIP_RAW 2
 
 //Read/Write data as type (int char, etc.) at address "addr" with offset "offset". eg DATA(int, buff, 8);
 #define DATA(type, addr, offset) *((type*)((uint8_t*)addr+offset))
+#define X_W(X, W) ((X<<16)+W)
+#define Y_H X_W
+    
+typedef struct {
+    uint8_t blue;
+    uint8_t green;
+    uint8_t red;
+}RGB;
     
 typedef  unsigned int color_t;
 
@@ -128,7 +136,7 @@ struct ipc_buffer
     uint32_t    used;   // used bytes in buffer
     struct ipc_message  data[0];    // data begin
 };
-
+    
 static inline void begin_draw(void)
 {
     __asm__ __volatile__(
@@ -155,6 +163,16 @@ void sys_create_window(int x, int y, int w, int h, const char *name,
      "D"(name),
      "S"(0) : "memory");
 };
+
+static inline
+void sys_change_window(int new_x, int new_y, int new_w, int new_h)
+{
+    __asm__ __volatile__(
+        "int $0x40"
+        ::"a"(67), "b"(new_x), "c"(new_y), "d"(new_w),"S"(new_h)
+    );
+}
+
 
 static inline
 void define_button(uint32_t x_w, uint32_t y_h, uint32_t id, uint32_t color)
@@ -208,6 +226,17 @@ void draw_text_sys(const char *text, int x, int y, int len, color_t color)
       "S"(len),"c"(color)
      :"memory");
 }
+static inline
+void draw_text_sys_bg(const char *text, int x, int y, int len, color_t color, color_t bg)
+{
+    __asm__ __volatile__(
+    "int $0x40"
+    ::"a"(4),"d"(text),
+      "b"((x << 16) | y),
+      "S"(len),"c"(color), "D"(bg)
+     :"memory");
+}
+
 
 static inline
 uint32_t get_skin_height(void)
@@ -343,8 +372,7 @@ uint64_t get_ns_count(void)
     return val;
 };
 
-static inline
-oskey_t get_key(void)
+static inline oskey_t get_key(void)
 {
     oskey_t val;
     __asm__ __volatile__(
@@ -608,6 +636,16 @@ static inline void draw_number_sys(int32_t number, int x, int y, int len, color_
     :"a"(47), "b"(fmt), "c"(number), "d"((x << 16) | y), "S"(color));
 }
 
+static inline void draw_number_sys_bg(int32_t number, int x, int y, int len, color_t color, color_t bg){
+    register uint32_t fmt;
+    fmt = len << 16 | 0x80000000; // no leading zeros + width
+//    fmt = len << 16 | 0x00000000; //  leading zeros + width
+    __asm__ __volatile__(
+    "int $0x40"
+    :
+    :"a"(47), "b"(fmt), "c"(number), "d"((x << 16) | y), "S"(color), "D"(bg));
+}
+
 static inline
 uint32_t get_mouse_eventstate(void)
 {
@@ -711,46 +749,6 @@ int start_app(char *app_name, char *args){
 
     return val;
 }
-
-
-/*
-static inline char *getcwd(char *buf, size_t size)
-{
-	int rc = get_current_folder(buf, size);
-	if (rc > size)
-	{
-		errno = ERANGE;
-		return 0;
-	}
-	else
-		return buf;
-}
-*/
-// end section
-
-
-
-//added nonstatic inline because incomfortabre stepping in in debugger
-void __attribute__ ((noinline)) debug_board_write_str(const char* str);
-void __attribute__ ((noinline)) debug_board_printf(const char *format,...);
-
-/* copy body to only one project file
-void __attribute__ ((noinline)) debug_board_write_str(const char* str){
-  while(*str)
-    debug_board_write_byte(*str++);
-}
-
-void __attribute__ ((noinline)) debug_board_printf(const char *format,...)
-{
-        va_list ap;
-        char log_board[300];
-
-        va_start (ap, format);
-        vsnprintf(log_board, sizeof log_board, format, ap);
-        va_end(ap);
-        debug_board_write_str(log_board);
-}
-*/
 
 // TinyC don't support aliasing of static inline funcs, but support #define :)
 #ifndef __TINYC__
