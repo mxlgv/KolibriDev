@@ -46,7 +46,7 @@ If not, then execute:
 After that, run ` ./build ` and after that the build will start. At the end of the build, the distribution kit can be run in "Qemu" or
 "VirtualBox", commands:
 
-` ./star_qemu`
+` ./start_qemu`
 
 `./start_qemu_kvm` 
 
